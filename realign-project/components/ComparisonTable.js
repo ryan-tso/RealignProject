@@ -64,7 +64,6 @@ const submitButtonStyle = {
 
 export default function ComparisonTable({products}) {
   const theme = useTheme();
-  const router = useRouter();
   const [checked, setChecked] = useState({});
   const [error, setError] = useState(false);
   const [initialValues, setInitialValues] = useState({
@@ -72,28 +71,6 @@ export default function ComparisonTable({products}) {
     phone: '',
   })
 
-  // Check if UTM visit and log it
-  useEffect(() => {
-    if (!router.isReady) return;
-    const params = router.query;
-    console.log(JSON.stringify(params));
-
-    let isUTM = false;
-    ['utm_source', 'utm_campaign', 'utm_medium', 'utm_content', 'utm_term'].forEach((property) => {
-      if (params.hasOwnProperty(property)) isUTM = true;
-    })
-
-    if (isUTM) {
-      axios.post(`/api/utms/`, params)
-        .then((response) => {
-          if (response.status === 200) {
-            console.log("UTM visit logged");
-          }
-        }).catch((err) => {
-        console.log(`Error in logging UTM ${JSON.stringify(err)}`);
-      })
-    }
-  }, [router.isReady, router.query])
 
   // Initialize check boxes
   useEffect(() => {
@@ -145,7 +122,7 @@ export default function ComparisonTable({products}) {
           window.dataLayer = window.dataLayer || [];
             for (let newSub of response.data) {
               dataLayer.push({
-                event: `button${newSub}-click`,
+                event: `subscribe-product${newSub}`,
                 conversionValue: 25
               })
             }
@@ -175,8 +152,8 @@ export default function ComparisonTable({products}) {
         <Stack direction='row' divider={<Divider orientation="vertical" flexItem/>}>
           <Box sx={{...specContainerStyle, backgroundColor: ''}}/>
           {
-            products.map((product) => (
-              <Stack spacing={3} direction='column'
+            products.map((product, index) => (
+              <Stack key={index} spacing={3} direction='column'
                      sx={{...productDetailContainerStyle, height: '100%', justifyContent: 'flex-start', mb: '20px'}}>
                 <Typography align='center' sx={{...productTitleTextStyle, backgroundColor: theme.palette.primary.main}}>
                   {product.name}
@@ -188,15 +165,15 @@ export default function ComparisonTable({products}) {
         </Stack>
         {
           products[0].specifications.map((item, index) => (
-            <Stack direction='row' divider={<Divider orientation="vertical" flexItem/>}>
+            <Stack key={index} direction='row' divider={<Divider orientation="vertical" flexItem/>}>
               <Box sx={specContainerStyle}>
                 <Typography align='center' sx={specTextStyle}>
                   {item.spec}
                 </Typography>
               </Box>
               {
-                products.map((product) => (
-                  <Box sx={productDetailContainerStyle}>
+                products.map((product, index) => (
+                  <Box key={index} sx={productDetailContainerStyle}>
                     <Typography align='center' sx={productDetailTextStyle}>
                       {product.specifications[index].description}
                     </Typography>
@@ -218,15 +195,15 @@ export default function ComparisonTable({products}) {
               <Stack direction="column" sx={{width: '84%'}}>
                 <Stack direction="row">
                   {
-                    products.map((product) => (
-                      <Box sx={{
+                    products.map((product, index) => (
+                      <Box key={index} sx={{
                         ...productDetailContainerStyle,
                         minHeight: 0,
                         width: '100%',
                         backgroundColor: FORM_BACKGROUND_COLOR
                       }}>
                         <Checkbox
-                          checked={checked[product.id]}
+                          checked={checked[product.id] ?? false}
                           onChange={(e) => setChecked({...checked, [product.id]: e.target.checked})}
                           sx={{color: 'white'}}
                         />

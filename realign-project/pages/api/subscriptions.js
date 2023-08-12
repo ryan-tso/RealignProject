@@ -5,6 +5,7 @@ const prisma = new PrismaClient();
 export default async (req, res) => {
 
   if (req.method === 'POST') {
+    console.log(`request body is ${JSON.stringify(req.body)}`)
     try {
       const {email, checkedProducts} = req.body;
       const phone = req.body.phone ?? '';
@@ -13,38 +14,38 @@ export default async (req, res) => {
         where: {email: email}
       })
 
-      console.log(`user is ${JSON.stringify(user)}`);
-
       if (!user) {
-        console.log('creating user...')
         const createdUser = await prisma.user.create({data:{email: email, phone: phone}});
-        console.log(`created user ${JSON.stringify(createdUser)}`);
       }
 
       let successfullySubscribed = []
 
       for (const [productId, checked] of Object.entries(checkedProducts)) {
-        const subscription = await prisma.subscription.findFirst({
-          where: {
-            AND: [
-              {productId: productId},
-              {userId: user.id}
-            ]
+        if (checked) {
+          const subscription = await prisma.subscription.findFirst({
+            where: {
+              AND: [
+                {productId: parseInt(productId)},
+                {userId: user.id}
+              ]
+            }
+          });
+          if (!subscription) {
+            const newSubscription = await prisma.subscription.create({
+              data: {
+                active: true,
+                status: 'Pending',
+                productId: parseInt(productId),
+                userId: user.id
+              }
+            })
+            successfullySubscribed.push(productId);
           }
-        });
-
-        if (checked && !subscription) {
-          const newSubscription = await prisma.subscription.create({
-            active: true,
-            status: 'Pending',
-            productId: productId,
-            userId: user.id
-          })
-          successfullySubscribed.push(productId);
         }
-        await prisma.$disconnect()
-        return res.status(200).json(successfullySubscribed);
       }
+      await prisma.$disconnect()
+      return res.status(200).json(successfullySubscribed);
+
     } catch (e) {
       await prisma.$disconnect()
       return res.status(400).json({err: `Error occurred with ${JSON.stringify(e)}`})
@@ -69,11 +70,11 @@ export default async (req, res) => {
         }
       });
 
-      // return value -> [{...subscription, product: {name: string}, user: {email: string}}]
-
-      return res.status(200).json(subscriptions);
+      await prisma.$disconnect()
+      return res.status(200).json(subscriptions);   // return value -> [{...subscription, product: {name: string}, user: {email: string, phone: string}}]
 
     } catch (e) {
+      await prisma.$disconnect()
       return res.status(400).json({err: `Error occurred with ${JSON.stringify(e)}`})
     }
   }

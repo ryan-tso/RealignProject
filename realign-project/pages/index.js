@@ -7,13 +7,16 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import {Box, Typography} from "@mui/material";
 import ComparisonTable from '../components/ComparisonTable';
+import {useEffect} from "react";
+import axios from "axios";
+import {useRouter} from "next/router";
 
 const TITLE = "Product Compare"
 const SUBTITLE = "Need help deciding? Compare our products and subscribe to be notified when it releases!"
 
 const PRODUCTS = [
   {
-    id: '1',
+    id: 1,
     name: 'Product 1',
     picture: 'https://career-files.s3.us-west-1.amazonaws.com/ProductIcon.png',
     specifications: [
@@ -24,7 +27,7 @@ const PRODUCTS = [
     ]
   },
   {
-    id: '2',
+    id: 2,
     name: 'Product 2',
     picture: 'https://career-files.s3.us-west-1.amazonaws.com/ProductIcon.png',
     specifications: [
@@ -69,6 +72,31 @@ const subtitleStyle = {
 
 
 export default function Home() {
+  const router = useRouter();
+
+  // Check if UTM visit and log it
+  useEffect(() => {
+    if (!router.isReady) return;
+    const params = router.query;
+
+    let isUTM = false;
+
+    ['utm_source', 'utm_campaign', 'utm_medium', 'utm_content', 'utm_term'].forEach((property) => {
+      if (params.hasOwnProperty(property)) isUTM = true;
+    })
+
+    if (isUTM) {
+      axios.post(`/api/utms/`, params)
+        .then((response) => {
+          if (response.status === 200) {
+            console.log("UTM visit logged");
+          }
+        }).catch((err) => {
+        console.log(`Error in logging UTM ${JSON.stringify(err)}`);
+      })
+    }
+  }, [router.isReady, router.query])
+
   return (
     <Box sx={pageStyle}>
       <Head>
