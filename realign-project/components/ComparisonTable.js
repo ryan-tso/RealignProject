@@ -55,13 +55,11 @@ const textFieldStyle = {
 const submitButtonStyle = {
   width: '20%',
   minWidth: '100px',
-  height: '50px',
+  height: '35px',
   mt: '15px',
   ml: 'auto',
   borderRadius: 10
 }
-
-
 
 
 export default function ComparisonTable({products}) {
@@ -138,21 +136,19 @@ export default function ComparisonTable({products}) {
         `/api/subscriptions/`,
         {...remainingValues, checkedProducts: checked},
         {headers: {'Content-Type': 'application/json'}}
-      ).then((response) => {
+      ).then((response) => {                      // Response Object -> [productId, productId, ...,]
         if (response.status === 200) {
           console.log('Successfully subscribed!');
           setInitialValues({email: '', phone: ''});
 
           // Trigger GTM tag for every subscription
           window.dataLayer = window.dataLayer || [];
-          for (let newConversion of response.data) {
-            for (let newSub of response.data){
+            for (let newSub of response.data) {
               dataLayer.push({
                 event: `button${newSub}-click`,
                 conversionValue: 25
               })
             }
-          }
         }
       }).catch((err) => {
         setError(true);
@@ -174,13 +170,14 @@ export default function ComparisonTable({products}) {
 
   return (
     <Box>
-      <Stack direction='column' divider={<Divider orientation="horizontal" flexItem />}>
+      <Stack direction='column' divider={<Divider orientation="horizontal" flexItem/>}>
 
-        <Stack direction='row' divider={<Divider orientation="vertical" flexItem />}>
-          <Box sx={{...specContainerStyle, backgroundColor: ''}} />
+        <Stack direction='row' divider={<Divider orientation="vertical" flexItem/>}>
+          <Box sx={{...specContainerStyle, backgroundColor: ''}}/>
           {
             products.map((product) => (
-              <Stack spacing={3} direction='column' sx={{...productDetailContainerStyle, height: '100%', justifyContent: 'flex-start', mb: '20px'}}>
+              <Stack spacing={3} direction='column'
+                     sx={{...productDetailContainerStyle, height: '100%', justifyContent: 'flex-start', mb: '20px'}}>
                 <Typography align='center' sx={{...productTitleTextStyle, backgroundColor: theme.palette.primary.main}}>
                   {product.name}
                 </Typography>
@@ -191,7 +188,7 @@ export default function ComparisonTable({products}) {
         </Stack>
         {
           products[0].specifications.map((item, index) => (
-            <Stack direction='row' divider={<Divider orientation="vertical" flexItem />}>
+            <Stack direction='row' divider={<Divider orientation="vertical" flexItem/>}>
               <Box sx={specContainerStyle}>
                 <Typography align='center' sx={specTextStyle}>
                   {item.spec}
@@ -207,29 +204,35 @@ export default function ComparisonTable({products}) {
                 ))
               }
             </Stack>
-        ))}
+          ))}
 
         <FormikProvider value={formik}>
           <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
             <Stack direction='row' sx={{backgroundColor: FORM_BACKGROUND_COLOR}}>
-              <Box sx={{...specContainerStyle, minHeight: 0, alignItems: 'flex-start', justifyContent: 'flex-end', mt: 1}}>
+              <Box
+                sx={{...specContainerStyle, minHeight: 0, alignItems: 'flex-start', justifyContent: 'flex-end', mt: 1}}>
                 <Typography align='right' sx={{fontSize: '1.5rem', fontWeight: 700, color: 'white'}}>
                   Notify Me
                 </Typography>
               </Box>
               <Stack direction="column" sx={{width: '84%'}}>
                 <Stack direction="row">
-                    {
-                      products.map((product) => (
-                        <Box sx={{...productDetailContainerStyle, minHeight: 0, width: '100%', backgroundColor: FORM_BACKGROUND_COLOR}}>
-                          <Checkbox
-                            checked={checked[product.id]}
-                            onChange={(e) => setChecked({...checked, [product.id]: e.target.checked})}
-                            sx={{color: 'white'}}
-                          />
-                        </Box>
-                      ))
-                    }
+                  {
+                    products.map((product) => (
+                      <Box sx={{
+                        ...productDetailContainerStyle,
+                        minHeight: 0,
+                        width: '100%',
+                        backgroundColor: FORM_BACKGROUND_COLOR
+                      }}>
+                        <Checkbox
+                          checked={checked[product.id]}
+                          onChange={(e) => setChecked({...checked, [product.id]: e.target.checked})}
+                          sx={{color: 'white'}}
+                        />
+                      </Box>
+                    ))
+                  }
                 </Stack>
                 <Box sx={{display: 'flex', flexDirection: 'column', width: '90%', mt: 2, ml: '5%', mr: '5%', mb: 5}}>
                   <Typography sx={{color: 'white'}}>Email</Typography>

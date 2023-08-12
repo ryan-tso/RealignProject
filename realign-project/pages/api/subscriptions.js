@@ -16,8 +16,9 @@ export default async (req, res) => {
       console.log(`user is ${JSON.stringify(user)}`);
 
       if (!user) {
-       const createdUser = await prisma.user.create({email: email, phone: phone});
-       console.log(JSON.stringify(createdUser));
+        console.log('creating user...')
+        const createdUser = await prisma.user.create({data:{email: email, phone: phone}});
+        console.log(`created user ${JSON.stringify(createdUser)}`);
       }
 
       let successfullySubscribed = []
@@ -26,28 +27,31 @@ export default async (req, res) => {
         const subscription = await prisma.subscription.findFirst({
           where: {
             AND: [
-              {product: productId},
-              {user: user.id}
+              {productId: productId},
+              {userId: user.id}
             ]
           }
         });
+
         if (checked && !subscription) {
-              const newSubscription = await prisma.subscription.create({
-                active: true,
-                status: 'Pending',
-                product: productId,
-                user: user.id
-              })
+          const newSubscription = await prisma.subscription.create({
+            active: true,
+            status: 'Pending',
+            productId: productId,
+            userId: user.id
+          })
           successfullySubscribed.push(productId);
         }
+        await prisma.$disconnect()
         return res.status(200).json(successfullySubscribed);
       }
     } catch (e) {
+      await prisma.$disconnect()
       return res.status(400).json({err: `Error occurred with ${JSON.stringify(e)}`})
     }
   }
 
-  if (req.method === 'POST') {
+  if (req.method === 'GET') {
     try {
       const subscriptions = await prisma.subscription.findMany({
         include: {
