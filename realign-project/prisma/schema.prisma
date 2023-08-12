@@ -35,3 +35,13 @@ model Subscription {
   user            User      @relation(fields: [userId], references: [id])      
   userId          Int
 }
+
+model UTM {
+  id              Int       @id @default(autoincrement())
+  timestamp       DateTime  @default(now())
+  source          String?
+  campaign        String?
+  medium          String?
+  content         String?
+  term            String?
+}

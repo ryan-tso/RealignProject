@@ -8,6 +8,34 @@ import '@fontsource/roboto/700.css';
 import {Box, Typography} from "@mui/material";
 import ComparisonTable from '../components/ComparisonTable';
 
+const TITLE = "Product Compare"
+const SUBTITLE = "Need help deciding? Compare our products and subscribe to be notified when it releases!"
+
+const PRODUCTS = [
+  {
+    id: '1',
+    name: 'Product 1',
+    picture: 'https://career-files.s3.us-west-1.amazonaws.com/ProductIcon.png',
+    specifications: [
+      {spec: 'Spec 1', description: 'Some details'},
+      {spec: 'Spec 2', description: 'Some more details'},
+      {spec: 'Spec 3', description: 'N/A'},
+      {spec: 'Spec 4', description: '3'}
+    ]
+  },
+  {
+    id: '2',
+    name: 'Product 2',
+    picture: 'https://career-files.s3.us-west-1.amazonaws.com/ProductIcon.png',
+    specifications: [
+      {spec: 'Spec 1', description: 'Some details'},
+      {spec: 'Spec 2', description: 'Some more details'},
+      {spec: 'Spec 3', description: 'N/A'},
+      {spec: 'Spec 4', description: '3'}
+    ]
+  },
+]
+
 const pageStyle = {
   position: 'relative',
   display: 'flex',
@@ -16,6 +44,7 @@ const pageStyle = {
   pt: '2vh',
   pl: {xs: 0, sm: '10%'},
   pr: {xs: 0, sm: '10%'},
+  backgroundColor: 'rgba(0,0,0,0.02)'
 }
 
 const pageTitleStyle = {
@@ -23,6 +52,7 @@ const pageTitleStyle = {
   flexDirection: 'column',
   ml: {xs: '2%', sm: 0},
   mr: {xs: '2%', sm: 0},
+  mb: '100px'
 }
 
 const titleStyle = {
@@ -37,8 +67,6 @@ const subtitleStyle = {
   textAlign: {xs: 'center', sm: 'left'}
 }
 
-const TITLE = "Product Compare"
-const SUBTITLE = "Need help deciding? Compare our products and subscribe to be notified when it releases!"
 
 export default function Home() {
   return (
@@ -52,6 +80,8 @@ export default function Home() {
         <Typography sx={titleStyle}> {TITLE} </Typography>
         <Typography sx={subtitleStyle}> {SUBTITLE} </Typography>
       </Box>
+
+      <ComparisonTable products={PRODUCTS}/>
 
 
     </Box>
