@@ -10,41 +10,41 @@ export default async (req, res) => {
       const {email, checkedProducts} = req.body;
       const phone = req.body.phone ?? '';
 
-      const user = await prisma.user.findUnique({
-        where: {email: email}
+      const user = await prisma.user.upsert({
+        where: {email: email},
+        update: {phone: phone},
+        create: {email: email, phone: phone},
       })
-
-      if (!user) {
-        const createdUser = await prisma.user.create({data:{email: email, phone: phone}});
-      }
 
       let successfullySubscribed = []
 
-      for (const [productId, checked] of Object.entries(checkedProducts)) {
-        if (checked) {
-          const subscription = await prisma.subscription.findFirst({
-            where: {
-              AND: [
-                {productId: parseInt(productId)},
-                {userId: user.id}
-              ]
-            }
-          });
-          if (!subscription) {
-            const newSubscription = await prisma.subscription.create({
-              data: {
-                active: true,
-                status: 'Pending',
-                productId: parseInt(productId),
-                userId: user.id
+      if (user) {
+        for (const [productId, checked] of Object.entries(checkedProducts)) {
+          if (checked) {
+            const subscription = await prisma.subscription.findFirst({
+              where: {
+                AND: [
+                  {productId: parseInt(productId)},
+                  {userId: user.id}
+                ]
               }
-            })
-            successfullySubscribed.push(productId);
+            });
+            if (!subscription) {
+              const newSubscription = await prisma.subscription.create({
+                data: {
+                  active: true,
+                  status: 'Pending',
+                  productId: parseInt(productId),
+                  userId: user.id
+                }
+              })
+              successfullySubscribed.push(productId);
+            }
           }
         }
+        await prisma.$disconnect()
+        return res.status(200).json(successfullySubscribed);
       }
-      await prisma.$disconnect()
-      return res.status(200).json(successfullySubscribed);
 
     } catch (e) {
       await prisma.$disconnect()
